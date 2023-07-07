@@ -1,0 +1,97 @@
+package gov.pssServices.pssServices.repoImpl;
+
+import gov.pssServices.pssServices.exception.PssException;
+import gov.pssServices.pssServices.repo.GetPensionerListForViewRepo;
+import gov.pssServices.pssServices.request.GetPensionerListForViewRequest;
+import gov.pssServices.pssServices.response.GetPensionerListForViewResponse;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Dependent
+public class GetPensionerListForViewRepoImpl implements GetPensionerListForViewRepo {
+    @Inject
+    @Named("PSN_RW")
+    private DataSource testDataSource;
+
+    @Override
+    public List<GetPensionerListForViewResponse> getEmployeeDetails(GetPensionerListForViewRequest getPensionerListForViewRequest) throws PssException {
+        Connection connection = null;
+        List<GetPensionerListForViewResponse> list = new ArrayList<>();
+        try {
+            connection = this.testDataSource.getConnection();
+            String sql ="SELECT DISTINCT\n" +
+                    "    P.PENSIONER_ID,\n" +
+                    "    P.EMPLOYEE_ID,\n" +
+                    " P.EMPLOYEE_CODE,\n"+
+                    "    P.NAME_EN AS PENSIONER_NAME,\n" +
+                    "    P.SSO_ID,\n" +
+                    "    P.PAN,\n" +
+                    "    P.MOB_NO,\n" +
+                    "    P.RELIGION_ID,\n" +
+                    "    P.DOB,\n" +
+                    "    P.EMAIL,\n" +
+                    "    C.GPO_NO,\n" +
+                    "    A.PPO_NO,\n" +
+                    "    B.CPO_NO,\n" +
+                    "    D.ASSIGNMENT_VALUE\n" +
+                    "FROM\n" +
+                    "    PSN.PSN_PERSONAL_DTLS P\n" +
+                    "    LEFT JOIN  PSN.PSN_PPO A ON P.PENSIONER_ID = A.PENSIONER_ID\n" +
+                    "    LEFT JOIN  PSN.PSN_CPO B ON A.PENSIONER_ID = B.PENSIONER_ID\n" +
+                    "    INNER JOIN  PSN.PSN_GPO C ON A.PENSIONER_ID = C.PENSIONER_ID\n" +
+                    "    LEFT JOIN sso.DTL_USER_ASSIGNMENT D ON D.USER_ASSIGNMENT_DTLS_ID=P.CREATED_BY_A_ID\n" +
+                    "    LEFT JOIN mdm.mst_office ofc ON ofc.office_id= D.ASSIGNMENT_VALUE \n" +
+                    "    where ofc.office_id= ?";
+
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, getPensionerListForViewRequest.getOfficeId());
+
+            System.out.println("The Data............" + sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                GetPensionerListForViewResponse getPensionerListForViewResponse = new GetPensionerListForViewResponse();
+                getPensionerListForViewResponse.setPensionerId(Long.parseLong(rs.getString("PENSIONER_ID")));
+                getPensionerListForViewResponse.setEmployeeId(Long.parseLong(rs.getString("EMPLOYEE_ID")));
+                getPensionerListForViewResponse.setPensionerName((rs.getString("PENSIONER_NAME")));
+                getPensionerListForViewResponse.setSsoId((rs.getString("SSO_ID"))!= null ? rs.getString("SSO_ID") : "");
+                getPensionerListForViewResponse.setPan((rs.getString("PAN")));
+                getPensionerListForViewResponse.setMobileNo((rs.getString("MOB_NO")));
+                getPensionerListForViewResponse.setReligionId((rs.getString("RELIGION_ID"))!= null ? rs.getString("RELIGION_ID") : "");
+                getPensionerListForViewResponse.setDob((rs.getString("DOB")));
+                getPensionerListForViewResponse.setEmail((rs.getString("EMAIL")));
+                getPensionerListForViewResponse.setGpoNo((rs.getString("GPO_NO")));
+                getPensionerListForViewResponse.setPpoNo((rs.getString("PPO_NO")));
+                getPensionerListForViewResponse.setCpoNo((rs.getString("CPO_NO")));
+                getPensionerListForViewResponse.setAssignmentValue((rs.getString("ASSIGNMENT_VALUE")));
+                getPensionerListForViewResponse.setEmployeeCode((rs.getString("EMPLOYEE_CODE")));
+                list.add(getPensionerListForViewResponse);
+            }
+            rs.close();
+            ps.close();
+            return list;
+        } catch(SQLException e){
+            e.printStackTrace();
+            System.out.println("Error - " + e.getMessage());
+            return null;
+        } catch(Exception e){
+            e.printStackTrace();
+            System.out.println("Error - " + e.getMessage());
+            return (List<GetPensionerListForViewResponse>)  new PssException("Error : Something went wrong");
+        } finally{
+            try{
+                if(!connection.isClosed()){
+                    connection.close();
+                }
+
+            } catch(SQLException e){
+                e.printStackTrace();
+            }
+
+        }
+    }
+}

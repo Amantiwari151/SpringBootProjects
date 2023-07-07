@@ -1,0 +1,12 @@
+package gov.pssServices.pssServices.request;
+
+import lombok.Data;
+
+@Data
+public class BankAccountDetailsRequest {
+	
+	private int psnId;
+	
+	private String ssoId;
+	
+}

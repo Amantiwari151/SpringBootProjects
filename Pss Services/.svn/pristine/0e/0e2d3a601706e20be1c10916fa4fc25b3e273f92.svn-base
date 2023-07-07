@@ -1,0 +1,20 @@
+package gov.pssServices.pssServices.serviceImpl;
+
+import gov.pssServices.pssServices.exception.PssException;
+import gov.pssServices.pssServices.repo.MarkReliveRepo;
+import gov.pssServices.pssServices.response.MarkReliveResponse;
+import gov.pssServices.pssServices.service.MarkReliveService;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.util.List;
+
+@ApplicationScoped
+public class MarkReliveServiceImpl implements MarkReliveService {
+    @Inject
+    private MarkReliveRepo updatePersonalDetailsRepo;
+    @Override
+    public String updatePersonalDetails(MarkReliveResponse updatePersonalDetailsRequest) throws PssException {
+        return updatePersonalDetailsRepo.updatePersonalDetailsAll(updatePersonalDetailsRequest);
+    }
+}

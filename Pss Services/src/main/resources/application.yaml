@@ -1,0 +1,17 @@
+server:
+  port: 8089
+javax:
+  sql:
+    DataSource:
+      WF_RW:
+        dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+        dataSource:
+          url: jdbc:oracle:thin:@10.70.236.206:1521/pension.sdc.raj.in
+          user: WF_RW
+          password: DeVwFrWpsn602#
+      PSN_RW:
+        dataSourceClassName: oracle.jdbc.pool.OracleDataSource
+        dataSource:
+          url: jdbc:oracle:thin:@10.70.236.206:1521/pension.sdc.raj.in
+          user: PSN_RW
+          password: DeVPsNRW602#

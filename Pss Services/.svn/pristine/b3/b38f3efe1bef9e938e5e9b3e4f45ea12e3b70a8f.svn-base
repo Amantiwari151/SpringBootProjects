@@ -1,0 +1,70 @@
+package gov.pssServices.pssServices.repoImpl;
+
+import gov.pssServices.pssServices.exception.PssException;
+import gov.pssServices.pssServices.repo.MarkReliveRepo;
+import gov.pssServices.pssServices.response.MarkReliveResponse;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+@Dependent
+public class MarkReliveRepoImpl implements MarkReliveRepo {
+    @Inject
+    @Named("PSN_RW")
+    private DataSource testDataSource;
+
+    @Override
+    public int updatePersonalDetailsAll(MarkReliveResponse updatePersonalDetailsRequest) throws PssException {
+        Connection connection = null;
+        int updatedRow=0;
+        try {
+            List<MarkReliveResponse> list = new ArrayList<>();
+            connection = this.testDataSource.getConnection();
+            String sql = "UPDATE  PSN.PSN_PERSONAL_DTLS SET IS_RELIVE = ? ,REMARK_RELIVE = ?  WHERE  EMPLOYEE_ID = ? ";
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1,updatePersonalDetailsRequest.getIsRelive());
+            ps.setString(2,updatePersonalDetailsRequest.getRemarkRelive());
+            ps.setString(3,updatePersonalDetailsRequest.getEmployeeId());
+
+            int executeId=ps.executeUpdate();
+
+            if(executeId==1) {
+                System.out.println("data updated successfully");
+                updatedRow = executeId;
+
+            }else  {
+                System.out.println("data not updated");
+            }
+            ps.close();
+
+            return updatedRow;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error - " + e.getMessage());
+            //return null;
+            return 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error - " + e.getMessage());
+           // return (List<MarkReliveResponse>) new PssException("Error : Something went wrong");
+            return 0;
+        } finally {
+            try {
+                if (!connection.isClosed()) {
+                    connection.close();
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+}

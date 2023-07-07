@@ -1,0 +1,11 @@
+package gov.pssServices.pssServices.response;
+
+import lombok.Data;
+
+@Data
+public class MarkReliveResponse {
+    private  String employeeId;
+    private  String isRelive;
+    private  String remarkRelive;
+
+}
